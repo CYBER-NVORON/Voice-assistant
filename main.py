@@ -6,7 +6,7 @@ from platform import system
 from music import Music
 from logic import Voice_assistant
 import webbrowser
-import configparser
+from configparser import ConfigParser
 
 music = Music()
 alice = Voice_assistant()
@@ -16,33 +16,31 @@ count_slider=1
 
 #При закрытии главного окна
 def on_closing():
-    #Говорит:"Ты уже уходишь? Ну ладно, пока.
+    with open("config.ini","r+") as file:
+        config.write(file)
     window.destroy()
 
 
 #При нажатии кнопки button
-def button_act():
+def button_act(self):
     music.background_music.pause()
     alice.makeSomething(alice.command())
     music.background_music.unpause()
 
 
 #При нажатии кнопки settings
-def settings_act():
+def settings_act(self):
 
     def background(_=None):
         music.background_music.set_volume(volume_background_music.get()/100)
+        config.set("Volume", "background_volume", str(int(volume_background_music.get())))
+
         
     #При закрытии окна настроек
     def on_closing_settings():
         #Сохранение громкости в файл
         config.set("Volume", "background_volume", str(int(volume_background_music.get())))
-        save.close()
         settings_window.destroy()
-        
-
-
-
 
     settings_window = Toplevel(window)
     settings_window.geometry("300x500")
@@ -50,18 +48,21 @@ def settings_act():
     settings_window.title("Settings")
     settings_window.wm_attributes("-topmost", True)
     settings_window.wm_attributes("-transparent", True)
-
+    canvas_set = Canvas(settings_window, width=width, height=height)
     #Закрытие окна настроек
     settings_window.protocol("WM_DELETE_WINDOW", on_closing_settings)
 
 
     #Фоновое изображение в настройках
-    background_settings_image = ImageTk.PhotoImage(Image.open("resources/interface/Dark_theme/black-theme-background.jpg"))
-    Label(settings_window, image=background_settings_image).pack()
+    # background_settings_image = ImageTk.PhotoImage(Image.open("resources/interface/Dark_theme/black-theme-background.jpg"))
+    # canvas_set.create_image(0, 0, image=background_settings_image, anchor=NW)
+    # canvas_set.pack()
     
     #Текст "Музыка"
-    Label(settings_window, text="Музыка",font = 'Arial 25', fg='white', background='black').place(x=0,y=0)
-    
+    # Label(settings_window, text="Музыка",font = 'Arial 25', fg='white', background='black').place(x=0,y=0)
+    canvas_set.create_text(50, 20,text="Музыка",font = 'Arial 25')
+    canvas_set.pack()
+
     #Ползунок для настройки сохранения
     img_slider = ImageTk.PhotoImage(file="resources/interface/Dark_theme/slider18.png", master= settings_window)
     style=ttk.Style(settings_window)
@@ -101,24 +102,31 @@ music.background_music.play(loops=-1)
 
 
 #Настройки для сохранения
-config = configparser.ConfigParser(strict=False)
-config.read("config.ini")
-save = open('config.ini', 'r+')
-music.background_music.set_volume(int(config.get("Volume", "background_volume"))/100)
-config.write(save)
+config = ConfigParser()
 
-# #Загрузка в конфиг значений, в случае, если не будет использовано окно settings_window
-config.set("Volume", "background_volume", str(int(music.background_music.get_volume()*100)))
-config.write(save)
+try:
+    open("config.ini", "r")
+except:
+    open("config.ini", "w")
+    config.add_section("Volume")
+    config["Volume"] = {'background_volume': "50"}
+    with open("config.ini", "w") as file:
+        config.write(file)
+
+config.read("config.ini")
+music.background_music.set_volume(int(config.get('Volume','background_volume'))/100)
 
 #Проверка размер окна, с помощью картинки
-(width,height)=(Image.open("resources/Alica/Dark_theme/1.jpg")).size
+(width,height)=(Image.open("resources/Alice/Dark_theme/1.jpg")).size
 
 #Настройки окна
+window.eval('tk::PlaceWindow . center')
 window.geometry(str(width)+"x"+str(height))
 window.resizable(False, False)
-window.title("Alica Voice Assistant")
+window.title("Alice Voice Assistant")
 window.wm_attributes("-transparent", True)
+window.iconphoto(True, PhotoImage(file=('resources/interface/icon/icon.png')))
+canvas = Canvas(window, width=width, height=height)
 
 
 #Закрытие главного окна
@@ -136,16 +144,22 @@ window.iconbitmap(icon)
 
 
 #Изображение Алисы
-alica_image = ImageTk.PhotoImage(file="resources/Alica/Dark_theme/1.jpg")
-Label(window, image=alica_image).place(x=-3,y=-3)
+alice_image = ImageTk.PhotoImage(file="resources/Alice/Dark_theme/1.jpg")
+canvas.create_image(0, 0, image=alice_image, anchor=NW)
+canvas.pack()
+# Label(window, image=alice_image).place(x=-3,y=-3)
 
 
-#Кнопка для активации main.py
-button_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/button1.jpg")
-Button(window, image=button_image, borderwidth=0, highlightthickness=0, padx=-100, pady=-100,  command = button_act,).pack(side= BOTTOM)
+#Кнопка для активации logic.py
+button_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/button1.png")
+# Button(window, image=button_image, borderwidth=0, highlightthickness=0, padx=-100, pady=-100,  command = button_act,).pack(side= BOTTOM)
+button_activate = canvas.create_image(width/2, height-50, image=button_image)
+canvas.tag_bind(button_activate, "<Button-1>", button_act)
 
 #Кнопка для активации Настройки
 settings_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/settings.jpg")
-Button(window, image=settings_image, highlightthickness=0, padx=-100, pady=-100, command = settings_act).place(x=310,y=0)
+# Button(window, image=settings_image, highlightthickness=0, padx=-100, pady=-100, command = settings_act).place(x=310,y=0)
+settings_activate = canvas.create_image(330, 20, image=settings_image)
+canvas.tag_bind(settings_activate, "<Button-1>", settings_act)
 
 window.mainloop()
