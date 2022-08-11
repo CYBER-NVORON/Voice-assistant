@@ -5,7 +5,6 @@ from PIL import Image, ImageTk
 from platform import system
 from music import Music
 from logic import Voice_assistant
-import webbrowser
 from configparser import ConfigParser
 
 music = Music()
