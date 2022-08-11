@@ -1,160 +1,151 @@
-import pyttsx3
-import os
-import time
-import random
-import webbrowser
-import subprocess
+from time import sleep
+from tkinter import *
+from tkinter import ttk
+from ttkwidgets import TickScale
+from PIL import Image, ImageTk
 from platform import system
-import speech_recognition as sr
+from music import Music
+from logic import Voice_assistant
+import webbrowser
+import configparser
 
-operation_system = system()
+music = Music()
+voice = Voice_assistant()
+window = Tk()
 
-class Voice_assistant():
+count_slider=1
 
-    def __init__(self):
-        pass
+#При закрытии главного окна
+def on_closing():
+    #Говорит:"Ты уже уходишь? Ну ладно, пока.
+    window.destroy()
 
-    def talk(self, words):
-		#os.system("say " + words)
-        pyttsx3.speak(words)
+
+#При нажатии кнопки button
+def button_act():
+    music.background_music.pause()
+    voice.makeSomething(voice.command())
+    music.background_music.unpause()
+
+
+#При нажатии кнопки settings
+def settings_act():
+
+    def background(_=None):
+        music.background_music.set_volume(volume_background_music.get()/100)
+        
+    #При закрытии окна настроек
+    def on_closing_settings():
+        #Сохранение громкости в файл
+        config.set("Volume", "background_volume", str(int(volume_background_music.get())))
+        save.close()
+        settings_window.destroy()
+        
+
+
+
+
+    settings_window = Toplevel(window)
+    settings_window.geometry("300x500")
+    settings_window.resizable(False, False)
+    settings_window.title("Settings")
+    settings_window.wm_attributes("-topmost", True)
+    settings_window.wm_attributes("-transparent", True)
+
+    #Закрытие окна настроек
+    settings_window.protocol("WM_DELETE_WINDOW", on_closing_settings)
+
+
+    #Фоновое изображение в настройках
+    background_settings_image = ImageTk.PhotoImage(Image.open("resources/interface/Dark_theme/black-theme-background.jpg"))
+    Label(settings_window, image=background_settings_image).pack()
     
-    def command(self):
-        r = sr.Recognizer()
-        with sr.Microphone() as source:
-            #r.pause_threshold = 1
-            r.adjust_for_ambient_noise(source)
-            audio = r.listen(source)
-
-        try:
-            zadanie = r.recognize_google(audio, language="ru-RU").lower()
-
-        except sr.UnknownValueError:
-            print(self.command())
-            self.talk("Я вас не поняла")
-            zadanie = self.command()
-
-        return zadanie
-
-    def makeSomething(self, zadanie):
-        #Блок разговора с Алисой
-        if zadanie == 'привет' or zadanie == 'здравствуйте' or zadanie == 'доброе утро' or zadanie == 'добрый день' or zadanie == 'добрый вечер':
-
-            day_time = int(time.strftime('%H'))
-            
-            if day_time < 12:
-                self.talk('Доброе утро.')
-
-            elif 12 <= day_time < 18:
-                self.talk('Добрый день.')
-
-            else:
-                self.talk('Добрый вечер.')
-
-            self.talk("Чем я могу помочь?")
-
-        elif zadanie == 'алиса':
-            self.talk("Слушаю...")
-
-        elif zadanie == 'как тебя зовут':
-            self.talk("Меня зовут Алиса")
-
-        elif zadanie == 'как дела':
-            dela = random.randint(1,2)
-
-            if (dela == 1):
-                self.talk("Пока я с вами, у меня всё хорошо")
-
-            elif (dela == 2):
-                self.talk("Всё в норме. Спасибо, что интересуетесь.")
-            
-        #Блок выключения асисстента
-        elif zadanie == 'пока' or zadanie == 'досвидания':
-            self.talk("Пока")
-
-        elif zadanie == 'сколько времени' or zadanie == 'время':
-            
-            self.talk("Время:"+time.strftime('%H'))
-            if int(time.strftime('%H'))==1 or int(time.strftime('%H'))==21:
-                self.talk(" час")
-            elif int(time.strftime('%H'))==2 or int(time.strftime('%H'))==3 or int(time.strftime('%H'))==4 or int(time.strftime('%H'))==22 or int(time.strftime('%H'))==23 or int(time.strftime('%H'))==24:
-                self.talk(" часa")
-            else:
-                self.talk(" часов")
-            self.talk(time.strftime('%M')+" минут")
-
-        #Блок открытия/закрытия приложений
-        elif 'открой калькулятор' in zadanie:
-            
-            self.talk("Открываю калькулятор")
-
-            if operation_system == 'Darwin':
-                os.system(f"open {'/Applications/Calculator.app'}")
-
-            elif operation_system == 'Windows':
-                os.system('start C:\\Windows\\System32\\calc.exe')
-
-            else:
-                subprocess.run("gnome-calculator")
-
-        elif 'открой браузер' in zadanie:
-
-            self.talk("Открываю браузер")
-
-            if operation_system == 'Darwin':
-                os.system(f"open {'/Applications/Safari.app'}")
-
-            else:
-                webbrowser.open("https://yandex.ru/")
-
-        elif 'открой календарь' in zadanie:
-
-            self.talk("Открываю календарь")
-
-            if operation_system == 'Darwin':
-                os.system(f"open {'/Applications/Calendar.app'}")
-
-            else:
-                webbrowser.open("https://calendar.yandex.ru/")
-
-        elif 'открой карту' in zadanie:
-            self.talk("Открываю карту")
-
-            if operation_system == 'Darwin':
-                os.system(f"open {'/Applications/Maps.app'}")
-            else:
-                webbrowser.open("https://map.yandex.ru/")
+    #Текст "Музыка"
+    Label(settings_window, text="Музыка",font = 'Arial 25', fg='white', background='black').place(x=0,y=0)
+    
+    #Ползунок для настройки сохранения
+    img_slider = ImageTk.PhotoImage(file="resources/interface/Dark_theme/slider18.png", master= settings_window)
+    style=ttk.Style(settings_window)
+    global count_slider
+    count_slider+=1
+    string_slider=str(count_slider)+'.custom.Horizontal.Scale.slider'
+    style.element_create(string_slider, 'image', img_slider)
+    style.layout('custom.Horizontal.TScale', [('Horizontal.Scale.trough', {'sticky': 'nswe'}),(string_slider,{'side': 'left', 'sticky': ''})])
+    volume_background_music = TickScale(settings_window,  orient="horizontal", style='custom.Horizontal.TScale', showvalue=FALSE, length=300, from_=0, to=100, resolution=1, command=background)
+    if int(music.background_music.get_volume()*100) == 0:
+        volume_background_music.set(int(music.background_music.get_volume()*100))
+    else:
+        volume_background_music.set(int(music.background_music.get_volume()*100)+1)
+    volume_background_music.place(x=0,y=40)
 
 
-        elif 'включи диктофон' in zadanie:
-            self.talk("Включаю диктофон")
+    #Кнопка для перехода в группы в ВК
 
-            if operation_system == 'Darwin':
-                os.system(f"open {'/Applications/VoiceMemos.app'}")
-            else:
-                self.talk("Данная функция на вашей операционной системе не поддерживается")
+    #vk_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/vk.jpg")
+    #Button(settings_window, image=vk_image, highlightthickness=0, padx=-100, pady=-100,  command = vk_act).place(x=173,y=467)
 
-        elif 'включи музыку' in zadanie:
-            self.talk("Включаю музыку")
+    #Кнопка для перехода в донат
+    #donation_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/donation.jpg")
+    #Button(settings_window, image=donation_image, highlightthickness=0, padx=-100, pady=-100, command = donation_act).place(x=232,y=467)
 
-            if operation_system == 'Darwin':
-                os.system(f"open {'/Applications/iTunes.app'}")
-            else:
-                self.talk("Данная функция на вашей операционной системе не поддерживается")
+    #Кнопка для перехода на сайт об разработчиков
+    #info_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/info.jpg")
+    #Button(settings_window, image=info_image, highlightthickness=0, padx=-100, pady=-100, command = info_act).place(x=267,y=467)
 
-        #Блок поиска запроса в Google
-        elif 'найди в интернете' in zadanie:
-            self.talk('Что мне найти?')
-            r = sr.Recognizer()
-            with sr.Microphone() as source:
-                r.pause_threshold = 1
-                r.adjust_for_ambient_noise(source, duration=1)
-                audio = r.listen(source)
-                url = r.recognize_google(audio).lower()
-                self.talk('Вот что я смогла найти.')
-            weburl="https://yandex.ru/search/?text=" + url
-            webbrowser.get().open(weburl)
 
-if __name__ == "__main__":
-    app = Voice_assistant()
-    while True:
-        app.makeSomething(app.command())
+    settings_window.mainloop()
+
+
+
+#Активация фоновой музыки
+music.background_music.play(loops=-1)
+
+
+#Настройки для сохранения
+config = configparser.ConfigParser(strict=False)
+config.read("config.ini")
+music.background_music.set_volume(int(config.get("Volume", "background_volume"))/100)
+save = open('config.ini', 'w')
+
+#Загрузка в конфиг значений, в случае, если не будет использовано окно settings_window
+config.set("Volume", "background_volume", str(int(music.background_music.get_volume()*100)))
+config.write(save)
+
+#Проверка размер окна, с помощью картинки
+(width,height)=(Image.open("resources/Alica/Dark_theme/1.jpg")).size
+
+#Настройки окна
+window.geometry(str(width)+"x"+str(height))
+window.resizable(False, False)
+window.title("Alica Voice Assistant")
+window.wm_attributes("-transparent", True)
+
+
+#Закрытие главного окна
+window.protocol("WM_DELETE_WINDOW", on_closing)
+
+
+#Иконка приложения
+if system() == 'Darwin':
+    icon = 'resources/interface/icon/icon.icns'
+elif system() == 'Windows':
+    icon = 'resources/interface/icon/icon.ico'
+else:
+    icon = 'resources/interface/icon/icon.xbm'
+window.iconbitmap(icon)
+
+
+#Изображение Алисы
+alica_image = ImageTk.PhotoImage(file="resources/Alica/Dark_theme/1.jpg")
+Label(window, image=alica_image).place(x=-3,y=-3)
+
+
+#Кнопка для активации main.py
+button_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/button1.jpg")
+Button(window, image=button_image, borderwidth=0, highlightthickness=0, padx=-100, pady=-100,  command = button_act,).pack(side= BOTTOM)
+
+#Кнопка для активации Настройки
+settings_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/settings.jpg")
+Button(window, image=settings_image, highlightthickness=0, padx=-100, pady=-100, command = settings_act).place(x=310,y=0)
+
+window.mainloop()
