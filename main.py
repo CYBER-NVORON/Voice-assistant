@@ -59,7 +59,6 @@ def settings_act(self):
     # canvas_set.pack()
     
     #Текст "Музыка"
-    # Label(settings_window, text="Музыка",font = 'Arial 25', fg='white', background='black').place(x=0,y=0)
     canvas_set.create_text(50, 20,text="Музыка",font = 'Arial 25')
     canvas_set.pack()
 
@@ -77,21 +76,6 @@ def settings_act(self):
     else:
         volume_background_music.set(int(music.background_music.get_volume()*100)+1)
     volume_background_music.place(x=0,y=40)
-
-
-    #Кнопка для перехода в группы в ВК
-
-    #vk_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/vk.jpg")
-    #Button(settings_window, image=vk_image, highlightthickness=0, padx=-100, pady=-100,  command = vk_act).place(x=173,y=467)
-
-    #Кнопка для перехода в донат
-    #donation_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/donation.jpg")
-    #Button(settings_window, image=donation_image, highlightthickness=0, padx=-100, pady=-100, command = donation_act).place(x=232,y=467)
-
-    #Кнопка для перехода на сайт об разработчиков
-    #info_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/info.jpg")
-    #Button(settings_window, image=info_image, highlightthickness=0, padx=-100, pady=-100, command = info_act).place(x=267,y=467)
-
 
     settings_window.mainloop()
 
@@ -147,18 +131,15 @@ window.iconbitmap(icon)
 alice_image = ImageTk.PhotoImage(file="resources/Alice/Dark_theme/1.jpg")
 canvas.create_image(0, 0, image=alice_image, anchor=NW)
 canvas.pack()
-# Label(window, image=alice_image).place(x=-3,y=-3)
 
 
 #Кнопка для активации logic.py
 button_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/button1.png")
-# Button(window, image=button_image, borderwidth=0, highlightthickness=0, padx=-100, pady=-100,  command = button_act,).pack(side= BOTTOM)
 button_activate = canvas.create_image(width/2, height-50, image=button_image)
 canvas.tag_bind(button_activate, "<Button-1>", button_act)
 
 #Кнопка для активации Настройки
 settings_image = ImageTk.PhotoImage(file="resources/interface/Dark_theme/settings.jpg")
-# Button(window, image=settings_image, highlightthickness=0, padx=-100, pady=-100, command = settings_act).place(x=310,y=0)
 settings_activate = canvas.create_image(330, 20, image=settings_image)
 canvas.tag_bind(settings_activate, "<Button-1>", settings_act)
 
