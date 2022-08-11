@@ -1,4 +1,3 @@
-from time import sleep
 from tkinter import *
 from tkinter import ttk
 from ttkwidgets import TickScale
@@ -10,7 +9,7 @@ import webbrowser
 import configparser
 
 music = Music()
-voice = Voice_assistant()
+alice = Voice_assistant()
 window = Tk()
 
 count_slider=1
@@ -24,7 +23,7 @@ def on_closing():
 #При нажатии кнопки button
 def button_act():
     music.background_music.pause()
-    voice.makeSomething(voice.command())
+    alice.makeSomething(alice.command())
     music.background_music.unpause()
 
 
@@ -104,10 +103,11 @@ music.background_music.play(loops=-1)
 #Настройки для сохранения
 config = configparser.ConfigParser(strict=False)
 config.read("config.ini")
+save = open('config.ini', 'r+')
 music.background_music.set_volume(int(config.get("Volume", "background_volume"))/100)
-save = open('config.ini', 'w')
+config.write(save)
 
-#Загрузка в конфиг значений, в случае, если не будет использовано окно settings_window
+# #Загрузка в конфиг значений, в случае, если не будет использовано окно settings_window
 config.set("Volume", "background_volume", str(int(music.background_music.get_volume()*100)))
 config.write(save)
 
